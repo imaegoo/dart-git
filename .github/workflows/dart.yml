@@ -21,8 +21,8 @@ jobs:
       matrix:
         sdk: [stable]
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.0
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
       - id: install
@@ -45,8 +45,8 @@ jobs:
         sdk: [stable]
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.0
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
       - id: install
@@ -65,8 +65,8 @@ jobs:
       - name: Build
         run: dart compile exe bin/main.dart -o dartgit
       - name: "Upload Artifact"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: dartgit
+          name: dartgit-${{ matrix.os }}
           path: dartgit
           if-no-files-found: error
