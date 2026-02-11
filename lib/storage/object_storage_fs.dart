@@ -75,13 +75,18 @@ class ObjectStorageFS implements ObjectStorage {
       packFilePath = packFilePath.substring(0, packFilePath.lastIndexOf('.'));
       packFilePath += '.pack';
 
-      var packFile = PackFile.fromFile(idxFile, packFilePath, _fs, getObject: (hash) {
-        try {
-          return read(hash);
-        } on GitObjectNotFound {
-          return null;
-        }
-      });
+      var packFile = PackFile.fromFile(
+        idxFile,
+        packFilePath,
+        _fs,
+        getObject: (hash) {
+          try {
+            return read(hash);
+          } on GitObjectNotFound {
+            return null;
+          }
+        },
+      );
       _packFiles.add(packFile);
     }
   }
@@ -132,8 +137,12 @@ class ObjectStorageFS implements ObjectStorage {
     var hash = obj.hash;
     var sha = obj.hash.toString();
 
-    var path =
-        p.join(_gitDir, 'objects', sha.substring(0, 2), sha.substring(2));
+    var path = p.join(
+      _gitDir,
+      'objects',
+      sha.substring(0, 2),
+      sha.substring(2),
+    );
     _fs.directory(p.dirname(path)).createSync(recursive: true);
 
     var exists = _fs.isFileSync(path);
