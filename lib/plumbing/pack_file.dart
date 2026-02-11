@@ -12,10 +12,13 @@ import 'package:dart_git/plumbing/pack_file_delta.dart';
 import 'package:dart_git/utils/bytes_data_reader.dart';
 import 'package:meta/meta.dart';
 
+typedef GetObject = GitObject? Function(GitHash hash);
+
 class PackFile {
   int numObjects = 0;
   IdxFile idx;
   FileSystem fs;
+  GetObject? getObject;
 
   RandomAccessFile file;
 
@@ -26,6 +29,7 @@ class PackFile {
     required this.file,
     required Uint8List headerBytes,
     required this.fs,
+    this.getObject,
   }) {
     assert(headerBytes.length == _headerSize);
 
@@ -55,8 +59,9 @@ class PackFile {
   static PackFile fromFile(
     IdxFile idxFile,
     String filePath,
-    FileSystem fs,
-  ) {
+    FileSystem fs, {
+    GetObject? getObject,
+  }) {
     var file = fs.file(filePath).openSync(mode: FileMode.read);
     var bytes = file.readSync(_headerSize);
 
@@ -65,6 +70,7 @@ class PackFile {
       file: file,
       headerBytes: bytes,
       fs: fs,
+      getObject: getObject,
     );
   }
 
@@ -168,6 +174,17 @@ class PackFile {
 
   RawObject? _fillRefDeltaObject(GitHash baseHash, Uint8List deltaData) {
     var baseObject = _objectByHash(baseHash);
+    if (baseObject == null) {
+      if (getObject != null) {
+        var obj = getObject!(baseHash);
+        if (obj != null) {
+          var type = ObjectTypes.getType(obj.formatStr());
+          var data = obj.serializeData();
+          baseObject = RawObject(data: data, type: type);
+        }
+      }
+    }
+
     if (baseObject == null) {
       return null;
     }
