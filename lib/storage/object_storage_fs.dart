@@ -75,8 +75,7 @@ class ObjectStorageFS implements ObjectStorage {
       packFilePath = packFilePath.substring(0, packFilePath.lastIndexOf('.'));
       packFilePath += '.pack';
 
-      var packFile = PackFile.fromFile(idxFile, packFilePath, _fs,
-          getObject: (hash) {
+      var packFile = PackFile.fromFile(idxFile, packFilePath, _fs, getObject: (hash) {
         try {
           return read(hash);
         } on GitObjectNotFound {
